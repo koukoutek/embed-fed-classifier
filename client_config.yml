@@ -1,0 +1,156 @@
+# Data configuration
+# Dataset
+dataset: Dataset # CacheDataset
+cache_rate: 1
+
+# dataset_path: "/mnt/d/Users/kokouk/Data/EMBED/EMBED_binary_clean_per_site/"
+train_dataset_path: "/mnt/d/Users/kokouk/Data/EMBED/EMBED_binary_256x256/EMBED_binary_256x256/train/original"
+test_dataset_path: "/mnt/d/Users/kokouk/Data/EMBED/EMBED_binary_256x256/EMBED_binary_256x256/test"
+# meta_data_path: /mnt/d/Users/kokouk/Projects/EMBEDFedClassifier/metadata/EMBED_cleaned_metadata.csv
+
+# Dataloader - to be optimized for training speed, depending of the GPU memory
+dataloader:
+  batch_size: 128
+  num_workers: 10
+  shuffle: true
+  pin_memory: true
+
+# Optimization configuration
+save_model_when: 0 # Metric has to be greater than this value for the model to be saved
+local_epochs: 5 # number of local epochs per client per round
+val_interval: 5
+personalized: true # If true, the model will be personalized for each client after training
+personalization_epochs: 400 # number of epochs for personalization   
+
+# Optimizer
+optimizer: 
+  name: 'Adam'
+  lr_backbone: 0.00001
+  lr_finetune: 0.0001
+  betas: [0.9, 0.999]
+  epsilon: 0.00000008
+  weight_decay: 0.00005
+
+# Loss function
+loss:
+  name: 'CrossEntropyLoss'
+  label_smoothing: 0.1
+  class_weights: true
+  # name: 'BCEWithLogitsLoss'
+  # name: 'BCELoss'
+
+# Metric 
+metric:
+  name: 'Accuracy'
+  num_classes: 2
+
+# Model configuration
+# model:
+#   name: 'ViT'
+#   in_channels: 1
+#   img_size: 1024
+#   patch_size: 32
+#   num_layers: 12
+#   num_heads: 8
+#   hidden_size: 768
+#   mlp_dim: 3072
+#   dropout_rate: 0
+#   proj_type: 'conv'
+#   classification: True
+#   num_classes: 2
+#   pos_embed_type: 'learnable'
+#   spatial_dims: 2
+model:
+  name: 'ConvNeXtTiny'
+#   name: 'ConvNeXtSmall'
+  # name: 'ConvNeXtBase'
+  num_classes: 2
+  pretrained: true
+  dropout: 0.5
+# model:
+#   name: 'SimpleNetwork'
+
+# Transformation configuration
+# Train 
+train_transforms:
+  LoadImaged_im:
+      keys: ['image']
+      ensure_channel_first: true
+  ScaleIntensityd:
+      keys: ['image']
+  Orientationd:
+      keys: ['image']
+      axcodes: 'RAS'
+      as_closest_canonical: true
+  CropForegroundd:
+      keys: ['image']
+      source_key: 'image'
+  ResizeWithPadOrCropd:
+      keys: ['image']
+      spatial_size: [256, 256]
+  RandFlipd_x:
+      keys: ['image']
+      prob: 0.2
+      spatial_axis: 0
+  RandFlipd_y:
+      keys: ['image']
+      prob: 0.2
+      spatial_axis: 1
+  RandRotated:
+      keys: ['image']
+      prob: 0.2
+      range_x: [-0.8, 0.8]
+      range_y: [-0.8, 0.8]
+      mode: 'bilinear'
+  RandAffined:
+      keys: ['image']
+      prob: 0.2
+      rotate_range: [0.2]
+      scale_range: [0.2]
+      mode: 'bilinear'
+#   RandAdjustContrastd:
+#       keys: ['image']
+#       prob: 0.2
+#       gamma: [0.5, 1]
+#   RandGaussianSmoothd:
+#       keys: ['image']
+#       prob: 0.3
+#       sigma_x: [0.15, 0.3]
+#       sigma_y: [0.15, 0.3]
+#   RandShiftIntensityd:
+#       keys: ['image']
+#       prob: 0.5
+#       offsets: 0.1
+#   RandGaussianNoised:
+#       keys: ['image']
+#       prob: 0.5
+#       mean: 0
+#       std: 0.08
+#   ThresholdIntensityd_clip_upper:
+#       keys: ['image']
+#       threshold: 1.0
+#       above: False
+#       cval: 1.0
+#   ThresholdIntensityd_clip_lower:
+#       keys: ['image']
+#       threshold: 0.0
+#       above: True
+#       cval: 0.0
+
+# Validation 
+eval_transforms:
+  LoadImaged_im:
+      keys: ['image']
+      ensure_channel_first: true
+  ScaleIntensityd:
+      keys: ['image']
+  Orientationd:
+      keys: ['image']
+      axcodes: 'RAS'
+      as_closest_canonical: true
+  CropForegroundd:
+      keys: ['image']
+      source_key: 'image'
+  ResizeWithPadOrCropd:
+      keys: ['image']
+      spatial_size: [256, 256]
